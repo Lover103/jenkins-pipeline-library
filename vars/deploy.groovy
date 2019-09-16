@@ -29,11 +29,11 @@ def call(Map map) {
         }
 
         stages {
-            // stage('获取代码') {
-            //     steps {
-            //         git([url: "${REPO_URL}", branch: "${BRANCH_NAME}"])
-            //     }
-            // }
+            stage('获取代码') {
+                steps {
+                    git([url: "${REPO_URL}", branch: "${BRANCH_NAME}"])
+                }
+            }
 
             stage('编译代码') {
                 steps {
