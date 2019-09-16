@@ -77,7 +77,7 @@ def call(Map map) {
                     docker run -d ${BRANCH_NAME}
                     """
 
-                    sshScript remote: remote, script: "deploy.sh"
+                    sshScript remote: server, script: "deploy.sh"
                 }
             }
 
