@@ -44,6 +44,51 @@ def call(Map map) {
                 }
             }
 
+            stage('测试环境部署') {
+                steps {
+                    withCredentials([usernamePassword(credentialsId: '192.168.4.10', passwordVariable: 'password', usernameVariable: 'userName')]) {
+
+                    // def imgName = ${REGISTRY_DOMAIN}/${DOCKER_NAMESPACE}/${project_name}
+
+                    // // 下载镜像
+                    // sshCommand remote: server, command: "docker pull ${imgName}"
+
+                    //  // 停止容器
+                    // sshCommand remote: server, command: "docker stop ${project_name}"
+
+                    // // 删除容器
+                    // sshCommand remote: server, command: "docker rm -f ${project_name}"
+                        
+                    // // 启动容器
+                    // sshCommand remote: server, command: "docker run -d --name ${project_name} -e TZ=Asia/Shanghai ${imgName}"
+                    
+                    // // 清理镜像
+                    // def clearNoneSSH = "n=`docker images | grep  '<none>' | wc -l`; if [ \$n -gt 0 ]; then docker rmi `docker images | grep  '<none>' | awk '{print \$3}'`; fi"
+                    
+                    // sshCommand remote: server, command: "${clearNoneSSH}"
+                    
+                        def remote = [:]
+                        remote.name = '192.168.4.10'
+                        remote.user = userName
+                        remote.password = password
+                        remote.host = '192.168.4.10'
+                        remote.allowAnyHosts = true
+
+                        writeFile file: 'deploy.sh', text: """
+                        docker ps | grep ${BRANCH_NAME} | awk '{print \$2}' >> /data/jenkins/mi_test_history
+                        echo /data/jenkins/mi_test_history
+                        docker ps | grep ${BRANCH_NAME} | awk '{print \$1}' | xargs docker kill || true
+                        docker images | grep ${BRANCH_NAME} | awk '{print \$1":"\$2}' | xargs docker rmi -f || true
+                        docker login --username=yourName --password=yourPassword registry.cn-shanghai.aliyuncs.com
+                        docker pull ${BRANCH_NAME}
+                        docker run -d ${BRANCH_NAME}
+                        """
+
+                        sshScript remote: remote, script: "deploy.sh"
+                    }
+                }
+            }
+
             stage('构建镜像') {
                 steps {
                     sh "wget -O build.sh https://raw.githubusercontent.com/Lover103/jenkins-pipeline-library/master/resources/shell/build.sh"
