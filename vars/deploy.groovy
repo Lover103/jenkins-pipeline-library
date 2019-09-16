@@ -40,6 +40,7 @@ def call(Map map) {
                     sh "node --version"
                     sh 'npm config set registry http://registry.npm.taobao.org/'
                     sh 'npm install'
+                    sh 'npm build'
                 }
             }
 
