@@ -11,6 +11,19 @@ def getServer() {
     return remote
 }
 
+def getTestServer(){
+    def remote = [:]
+    remote.name = "192.168.4.10'"
+    remote.host = '192.168.4.10'
+    remote.port = 22
+    remote.allowAnyHosts = true
+    withCredentials([usernamePassword(credentialsId: '192.168.4.10', passwordVariable: 'password', usernameVariable: 'userName')]) {
+        remote.user = "${userName}"
+        remote.password = "${password}"
+    }
+    return remote
+}
+
 def call(Map map) {
 
     pipeline {
@@ -44,28 +57,27 @@ def call(Map map) {
                 }
             }
 
+            stage('初始化发版配置') {
+                steps {
+                    script {
+                        server = getTestServer()
+                    }
+                }
+            }
+
             stage('测试环境部署') {
                 steps {
-                    withCredentials([usernamePassword(credentialsId: '192.168.4.10', passwordVariable: 'password', usernameVariable: 'userName')]) {
-                        def remote = [:]
-                        remote.name = '192.168.4.10'
-                        remote.user = $userName
-                        remote.password = $password
-                        remote.host = '192.168.4.10'
-                        remote.allowAnyHosts = true
+                    writeFile file: 'deploy.sh', text: """
+                    docker ps | grep ${BRANCH_NAME} | awk '{print \$2}' >> /data/jenkins/mi_test_history
+                    echo /data/jenkins/mi_test_history
+                    docker ps | grep ${BRANCH_NAME} | awk '{print \$1}' | xargs docker kill || true
+                    docker images | grep ${BRANCH_NAME} | awk '{print \$1":"\$2}' | xargs docker rmi -f || true
+                    docker login --username=yourName --password=yourPassword registry.cn-shanghai.aliyuncs.com
+                    docker pull ${BRANCH_NAME}
+                    docker run -d ${BRANCH_NAME}
+                    """
 
-                        writeFile file: 'deploy.sh', text: """
-                        docker ps | grep ${BRANCH_NAME} | awk '{print \$2}' >> /data/jenkins/mi_test_history
-                        echo /data/jenkins/mi_test_history
-                        docker ps | grep ${BRANCH_NAME} | awk '{print \$1}' | xargs docker kill || true
-                        docker images | grep ${BRANCH_NAME} | awk '{print \$1":"\$2}' | xargs docker rmi -f || true
-                        docker login --username=yourName --password=yourPassword registry.cn-shanghai.aliyuncs.com
-                        docker pull ${BRANCH_NAME}
-                        docker run -d ${BRANCH_NAME}
-                        """
-
-                        sshScript remote: remote, script: "deploy.sh"
-                    }
+                    sshScript remote: remote, script: "deploy.sh"
                 }
             }
 
