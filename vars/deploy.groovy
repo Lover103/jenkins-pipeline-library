@@ -57,7 +57,7 @@ def call(Map map) {
                 }
             }
 
-            stage('初始化发版配置') {
+            stage('初始化测试环境配置') {
                 steps {
                     script {
                         server = getTestServer()
