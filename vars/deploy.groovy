@@ -30,9 +30,9 @@ def call(Map map) {
 
         stages {
             stage('获取代码') {
-                steps {
-                    git([url: "${REPO_URL}", branch: "${BRANCH_NAME}"])
-                }
+                // steps {
+                //     git([url: "${REPO_URL}", branch: "${BRANCH_NAME}"])
+                // }
             }
 
             stage('编译代码') {
@@ -40,7 +40,7 @@ def call(Map map) {
                     sh "node --version"
                     sh 'npm config set registry http://registry.npm.taobao.org/'
                     sh 'npm install'
-                    sh 'npm build'
+                    sh 'npm run build'
                 }
             }
 

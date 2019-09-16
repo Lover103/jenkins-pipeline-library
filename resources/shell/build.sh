@@ -6,7 +6,7 @@ registry="192.168.1.62:5000"
 timestamp=`date +%Y%m%d%H%M%S`
 
 # 检索出所有Dockerfile
-Dockerfiles=`find -name Dockerfile`
+Dockerfiles=`find . -name Dockerfile`
 echo "检索到Dockerfile：" "${Dockerfiles}"
 
 j=0
