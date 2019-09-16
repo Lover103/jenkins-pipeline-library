@@ -11,7 +11,7 @@ echo "检索到Dockerfile：" "${Dockerfiles}"
 
 j=0
 for d in ${Dockerfiles} ; do
-    ((j++))
+    j=j+1
 done
 echo "$j"
 if [ "$j" -eq "0" ]; then
