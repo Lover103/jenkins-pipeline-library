@@ -14,7 +14,7 @@ for d in ${Dockerfiles} ; do
     j=j+1
 done
 echo "$j"
-if [ "$j" -eq "0" ]; then
+if [ $j -eq 0 ]; then
     echo '没有检索到Dockerfile'
     exit 1
 fi
@@ -24,7 +24,7 @@ files=`git diff --name-only HEAD~ HEAD`
 echo "git提交的文件：" "${files[@]}"
 
 # 单个module的项目
-if [ "$j" -eq "1" ];
+if [ $j -eq 1 ];
 then
     module=`pwd`
     module=`echo ${module%_*}`
