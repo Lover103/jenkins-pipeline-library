@@ -14,7 +14,11 @@ def getServer() {
 def call(Map map) {
 
     pipeline {
-        agent any
+        agent {
+            docker {
+                image 'node'
+            }
+        }
 
         environment {
             REMOTE_HOST = "${map.REMOTE_HOST}"
@@ -33,20 +37,20 @@ def call(Map map) {
 
             stage('编译代码') {
                 steps {
-                    withMaven(maven: 'maven 3.6') {
-                        sh "mvn -U -am clean package -DskipTests"
-                    }
+                    sh "node --version"
+                    sh 'npm config set registry http://registry.npm.taobao.org/'
+                    sh 'npm install'
                 }
             }
 
             stage('构建镜像') {
                 steps {
-                    sh "wget -O build.sh https://git.x-vipay.com/docker/jenkins-pipeline-library/raw/master/resources/shell/build.sh"
+                    sh "wget -O build.sh https://raw.githubusercontent.com/Lover103/jenkins-pipeline-library/master/resources/shell/build.sh"
                     sh "sh build.sh ${BRANCH_NAME} "
                 }
             }
 
-            stage('init-server') {
+            stage('初始化发版配置') {
                 steps {
                     script {
                         server = getServer()
@@ -57,7 +61,7 @@ def call(Map map) {
             stage('执行发版') {
                 steps {
                     writeFile file: 'deploy.sh', text: "wget -O ${COMPOSE_FILE_NAME} " +
-                            " https://git.x-vipay.com/docker/jenkins-pipeline-library/raw/master/resources/docker-compose/${COMPOSE_FILE_NAME} \n" +
+                            " https://raw.githubusercontent.com/Lover103/jenkins-pipeline-library/master/resources/docker-compose/${COMPOSE_FILE_NAME} \n" +
                             "sudo docker stack deploy -c ${COMPOSE_FILE_NAME} ${STACK_NAME}"
                     sshScript remote: server, script: "deploy.sh"
                 }

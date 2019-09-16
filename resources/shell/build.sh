@@ -2,12 +2,12 @@
 
 # env
 branch=${1:-master}
-registry="193.112.61.178:5000"
+registry="192.168.1.62:5000"
 timestamp=`date +%Y%m%d%H%M%S`
 
 # 检索出所有Dockerfile
 Dockerfiles=`find -name Dockerfile`
-echo "检索到Dockerfile：\n%s\n" "${Dockerfiles}"
+echo "检索到Dockerfile：" "${Dockerfiles}"
 
 j=0
 for d in ${Dockerfiles} ; do
@@ -15,13 +15,13 @@ for d in ${Dockerfiles} ; do
 done
 echo "$j"
 if [ "$j" -eq "0" ]; then
-    echo '没有检索到Dokcerfile'
+    echo '没有检索到Dockerfile'
     exit 1
 fi
 
 # 检索到变更的module
 files=`git diff --name-only HEAD~ HEAD`
-echo "git提交的文件：\n%s\n" "${files[@]}"
+echo "git提交的文件：" "${files[@]}"
 
 # 单个module的项目
 if [ "$j" -eq "1" ];
@@ -79,6 +79,3 @@ else
     done
     echo "构建完成！"
 fi
-
-
-
