@@ -67,16 +67,19 @@ def call(Map map) {
 
             stage('测试环境部署') {
                 steps {
-                    writeFile file: 'deploy.sh', text: """
-                    module='pwd'
-                    module='echo ${module%_*}'
-                    module='echo ${module##*/}'
-                    docker ps | grep ${module}:${BRANCH_NAME}-latest | awk '{print \$1}' | xargs docker kill || true
-                    docker images | grep ${module}:${BRANCH_NAME}-latest | awk '{print \$1":"\$2}' | xargs docker rmi -f || true
-                    docker pull ${module}:${BRANCH_NAME}-latest
-                    docker run -d ${module}:${BRANCH_NAME}-latest
-                    """
-                    sshScript remote: server, script: "deploy.sh"
+                    // writeFile file: 'deploy.sh', text: """
+                    // module='pwd'
+                    // module='echo ${module%_*}'
+                    // module='echo ${module##*/}'
+                    // docker ps | grep ${module}:${BRANCH_NAME}-latest | awk '{print \$1}' | xargs docker kill || true
+                    // docker images | grep ${module}:${BRANCH_NAME}-latest | awk '{print \$1":"\$2}' | xargs docker rmi -f || true
+                    // docker pull ${module}:${BRANCH_NAME}-latest
+                    // docker run -d ${module}:${BRANCH_NAME}-latest
+                    // """
+                    // sshScript remote: server, script: "deploy.sh"
+
+                    def clearNoneSSH = "wget -O deploy.sh https://raw.githubusercontent.com/Lover103/jenkins-pipeline-library/master/resources/shell/deploy.sh sh deploy.sh ${BRANCH_NAME} "
+                    sshCommand remote: server, command: "${clearNoneSSH}"
                 }
             }
 
@@ -132,14 +135,28 @@ def call(Map map) {
 
         post {
             always {
+                deleteDir()
                 echo 'Test run completed'
                 cucumber buildStatus: 'UNSTABLE', failedFeaturesNumber: 999, failedScenariosNumber: 999, failedStepsNumber: 3, fileIncludePattern: '**/*.json', skippedStepsNumber: 999
             }
             success {
                 echo 'Successfully!'
+                mail(
+                    from: "quan.shi@zymobi.com",
+                    to: "quan.shi@zymobi.com",
+                    subject: "That build passed.",
+                    body: "Nothing to see here"
+                )
             }
             failure {
                 echo 'Failed!'
+
+                mail(
+                    from: "quan.shi@zymobi.com",
+                    to: "quan.shi@zymobi.com",
+                    subject: "That build passed.",
+                    body: "Nothing to see here"
+                )
             }
             unstable {
                 echo 'This will run only if the run was marked as unstable'
