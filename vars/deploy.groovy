@@ -68,9 +68,9 @@ def call(Map map) {
             stage('测试环境部署') {
                 steps {
                     writeFile file: 'deploy.sh', text: """
-                    module=`pwd`
-                    module=`echo ${module%_*}`
-                    module=`echo ${module##*/}`
+                    module='pwd'
+                    module='echo ${module%_*}'
+                    module='echo ${module##*/}'
                     docker ps | grep ${module}:${BRANCH_NAME}-latest | awk '{print \$1}' | xargs docker kill || true
                     docker images | grep ${module}:${BRANCH_NAME}-latest | awk '{print \$1":"\$2}' | xargs docker rmi -f || true
                     docker pull ${module}:${BRANCH_NAME}-latest
