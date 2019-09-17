@@ -168,8 +168,8 @@ def call(Map map) {
         }
 
         options {
-            disableConcurrentBuilds(),
-            skipDefaultCheckout(),
+            disableConcurrentBuilds()
+            skipDefaultCheckout()
             timeout(time: 60, unit: 'MINUTES')
         }
     }
