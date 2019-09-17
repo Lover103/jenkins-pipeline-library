@@ -68,15 +68,14 @@ def call(Map map) {
             stage('测试环境部署') {
                 steps {
                     writeFile file: 'deploy.sh', text: """
-                    docker ps | grep ${BRANCH_NAME} | awk '{print \$2}' >> /data/jenkins/mi_test_history
-                    echo /data/jenkins/mi_test_history
-                    docker ps | grep ${BRANCH_NAME} | awk '{print \$1}' | xargs docker kill || true
-                    docker images | grep ${BRANCH_NAME} | awk '{print \$1":"\$2}' | xargs docker rmi -f || true
-                    docker login --username=yourName --password=yourPassword registry.cn-shanghai.aliyuncs.com
-                    docker pull ${BRANCH_NAME}
-                    docker run -d ${BRANCH_NAME}
+                    module=`pwd`
+                    module=`echo ${module%_*}`
+                    module=`echo ${module##*/}`
+                    docker ps | grep ${module}:${BRANCH_NAME}-latest | awk '{print \$1}' | xargs docker kill || true
+                    docker images | grep ${module}:${BRANCH_NAME}-latest | awk '{print \$1":"\$2}' | xargs docker rmi -f || true
+                    docker pull ${module}:${BRANCH_NAME}-latest
+                    docker run -d ${module}:${BRANCH_NAME}-latest
                     """
-
                     sshScript remote: server, script: "deploy.sh"
                 }
             }
@@ -89,6 +88,9 @@ def call(Map map) {
             }
 
             stage('初始化发版配置') {
+                when {
+                    branch 'production'
+                }
                 steps {
                     script {
                         server = getServer()
@@ -97,6 +99,9 @@ def call(Map map) {
             }
 
             stage('执行发版') {
+                when {
+                    branch 'production'
+                }
                 steps {
                     writeFile file: 'deploy.sh', text: "wget -O ${COMPOSE_FILE_NAME} " +
                             " https://raw.githubusercontent.com/Lover103/jenkins-pipeline-library/master/resources/docker-compose/${COMPOSE_FILE_NAME} \n" +
@@ -123,6 +128,32 @@ def call(Map map) {
                     // sshCommand remote: server, command: "${clearNoneSSH}"
                 }
             }
+        }
+
+        post {
+            always {
+                echo 'Test run completed'
+                cucumber buildStatus: 'UNSTABLE', failedFeaturesNumber: 999, failedScenariosNumber: 999, failedStepsNumber: 3, fileIncludePattern: '**/*.json', skippedStepsNumber: 999
+            }
+            success {
+                echo 'Successfully!'
+            }
+            failure {
+                echo 'Failed!'
+            }
+            unstable {
+                echo 'This will run only if the run was marked as unstable'
+            }
+            changed {
+                echo 'This will run only if the state of the Pipeline has changed'
+                echo 'For example, if the Pipeline was previously failing but is now successful'
+            }
+        }
+
+        options {
+            disableConcurrentBuilds(),
+            skipDefaultCheckout(),
+            timeout(time: 60, unit: 'MINUTES')
         }
     }
 }
