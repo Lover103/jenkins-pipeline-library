@@ -78,8 +78,7 @@ def call(Map map) {
                     // """
                     // sshScript remote: server, script: "deploy.sh"
 
-                    def clearNoneSSH = "wget -O deploy.sh https://raw.githubusercontent.com/Lover103/jenkins-pipeline-library/master/resources/shell/deploy.sh sh deploy.sh ${BRANCH_NAME} "
-                    sshCommand remote: server, command: "${clearNoneSSH}"
+                    sshCommand remote: server, command: "wget -O deploy.sh https://raw.githubusercontent.com/Lover103/jenkins-pipeline-library/master/resources/shell/deploy.sh; deploy.sh ${BRANCH_NAME} "
                 }
             }
 
