@@ -57,7 +57,7 @@ def call(Map map) {
                 }
             }
 
-            stage('初始化测试环境配置') {
+            stage('初始化测试环境') {
                 steps {
                     script {
                         server = getTestServer()
@@ -78,7 +78,7 @@ def call(Map map) {
                     // """
                     // sshScript remote: server, script: "deploy.sh"
 
-                    sshCommand remote: server, command: "wget -O deploy.sh https://raw.githubusercontent.com/Lover103/jenkins-pipeline-library/master/resources/shell/deploy.sh; deploy.sh ${BRANCH_NAME} "
+                    sshCommand remote: server, command: "wget -O deploy.sh https://raw.githubusercontent.com/Lover103/jenkins-pipeline-library/master/resources/shell/deploy.sh; sh deploy.sh ${BRANCH_NAME} "
                 }
             }
 
@@ -89,7 +89,7 @@ def call(Map map) {
                 }
             }
 
-            stage('初始化发版配置') {
+            stage('初始化正式环境') {
                 when {
                     branch 'production'
                 }
@@ -100,7 +100,7 @@ def call(Map map) {
                 }
             }
 
-            stage('执行发版') {
+            stage('正式环境部署') {
                 when {
                     branch 'production'
                 }
@@ -140,22 +140,22 @@ def call(Map map) {
             }
             success {
                 echo 'Successfully!'
-                mail(
-                    from: "quan.shi@zymobi.com",
-                    to: "quan.shi@zymobi.com",
-                    subject: "That build passed.",
-                    body: "Nothing to see here"
-                )
+                // mail(
+                //     from: "quan.shi@zymobi.com",
+                //     to: "quan.shi@zymobi.com",
+                //     subject: "That build passed.",
+                //     body: "Nothing to see here"
+                // )
             }
             failure {
                 echo 'Failed!'
 
-                mail(
-                    from: "quan.shi@zymobi.com",
-                    to: "quan.shi@zymobi.com",
-                    subject: "That build passed.",
-                    body: "Nothing to see here"
-                )
+                // mail(
+                //     from: "quan.shi@zymobi.com",
+                //     to: "quan.shi@zymobi.com",
+                //     subject: "That build passed.",
+                //     body: "Nothing to see here"
+                // )
             }
             unstable {
                 echo 'This will run only if the run was marked as unstable'
