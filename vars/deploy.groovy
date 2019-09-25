@@ -33,6 +33,15 @@ def call(Map map) {
             }
         }
 
+        triggers{
+            gitlab(
+                triggerOnPush: true, 
+                triggerOnMergeRequest: false,
+                branchFilterType: 'All',
+                secretToken: "abcdxxxfa"
+            )
+        }
+
         environment {
             REMOTE_HOST = "${map.REMOTE_HOST}"
             REPO_URL = "${map.REPO_URL}"
@@ -98,25 +107,6 @@ def call(Map map) {
                             " https://raw.githubusercontent.com/Lover103/jenkins-pipeline-library/master/resources/docker-compose/${COMPOSE_FILE_NAME} \n" +
                             "sudo docker stack deploy -c ${COMPOSE_FILE_NAME} ${STACK_NAME}"
                     sshScript remote: server, script: "deploy.sh"
-
-                                        // def imgName = ${REGISTRY_DOMAIN}/${DOCKER_NAMESPACE}/${project_name}
-
-                    // // 下载镜像
-                    // sshCommand remote: server, command: "docker pull ${imgName}"
-
-                    //  // 停止容器
-                    // sshCommand remote: server, command: "docker stop ${project_name}"
-
-                    // // 删除容器
-                    // sshCommand remote: server, command: "docker rm -f ${project_name}"
-                        
-                    // // 启动容器
-                    // sshCommand remote: server, command: "docker run -d --name ${project_name} -e TZ=Asia/Shanghai ${imgName}"
-                    
-                    // // 清理镜像
-                    // def clearNoneSSH = "n=`docker images | grep  '<none>' | wc -l`; if [ \$n -gt 0 ]; then docker rmi `docker images | grep  '<none>' | awk '{print \$3}'`; fi"
-                    
-                    // sshCommand remote: server, command: "${clearNoneSSH}"
                 }
             }
         }
