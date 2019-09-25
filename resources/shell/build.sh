@@ -10,8 +10,8 @@ Dockerfiles=`find . -name Dockerfile`
 echo "检索到Dockerfile：" "${Dockerfiles}"
 
 # 检索到变更的module
-files=`git diff --name-only HEAD~ HEAD`
-echo "git提交的文件：" "${files[@]}"
+# files=`git diff --name-only HEAD~ HEAD`
+# echo "git提交的文件：" "${files[@]}"
 
 module=`pwd`
 module=`echo ${module%_*}`
