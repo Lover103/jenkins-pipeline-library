@@ -27,12 +27,7 @@ def getTestServer(){
 def call(Map map) {
 
     pipeline {
-        agent {
-            docker {
-                image 'node'
-            }
-        }
-
+        agent any
         triggers{
             gitlab(
                 triggerOnPush: true, 
@@ -58,6 +53,11 @@ def call(Map map) {
             }
 
             stage('编译代码') {
+                agent {
+                    docker {
+                        image 'node'
+                    }
+                }
                 steps {
                     sh "node --version"
                     sh 'npm config set registry http://registry.npm.taobao.org/'
